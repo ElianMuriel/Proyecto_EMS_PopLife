@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMS Dashboard</title>
+<style>
+  body { font-family: Arial; margin:0; background: #1e1e1e; color: #eee; }
+  header { background: #2c2c2c; padding: 20px; text-align: center; }
+  header h1 { margin: 0; color: #FFD700; font-size: 1.8em; }
+  .container { padding: 20px; max-width: 1200px; margin:auto; }
+  input, button { padding: 10px; margin: 5px; border-radius: 5px; border: none; font-size: 1em; }
+  input { width: 200px; }
+  button { background: #FFD700; color: #1e1e1e; cursor: pointer; font-weight: bold; }
+  button:hover { background: #e6c200; }
+
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  th, td { border: 1px solid #444; padding: 10px; text-align: left; font-size: 0.95em; }
+  th { background: #333; color: #FFD700; }
+  tr.active { background: #004400; color: #fff; font-weight: bold; }
+
+  h2 { color: #FFD700; margin-top: 30px; }
+
+  #activos ul { list-style: none; padding: 0; margin: 0; }
+  #activos li { padding: 8px 0; font-size: 1.1em; }
+
+  /* Adaptativo */
+  @media(max-width:768px){
+    input { width: 100%; margin-bottom: 10px; }
+    button { width: 48%; margin-bottom: 10px; }
+    table, thead, tbody, th, td, tr { display: block; }
+    th { display:none; }
+    tr { margin-bottom: 15px; border-bottom: 2px solid #444; }
+    td { text-align: right; padding-left: 50%; position: relative; }
+    td::before { content: attr(data-label); position: absolute; left: 10px; width: 45%; text-align:left; font-weight:bold; color:#FFD700; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>EMS Dashboard</h1>
+</header>
+<div class="container">
+  <div id="loginDiv">
+    <input type="text" id="nombre" placeholder="Tu nombre">
+    <button onclick="login()">Ingresar</button>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <p>Bienvenido <span id="usuarioNombre"></span>!</p>
+    <button onclick="registrarEntrada()">Entrada</button>
+    <button onclick="registrarSalida()">Salida</button>
+
+    <h2>EMS Activos</h2>
+    <div id="activos"><ul></ul></div>
+
+    <h2>Turnos Activos y Completados</h2>
+    <table>
+      <thead>
+        <tr><th>Nombre</th><th>Entrada</th><th>Salida</th><th>Tiempo del Turno</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <h2>Horas Acumuladas</h2>
+    <table>
+      <thead>
+        <tr><th>Nombre</th><th>Total</th><th>Semanal</th><th>Mensual</th></tr>
+      </thead>
+      <tbody id="tbodyAcumulado"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+
+async function login() {
+  const nombre = document.getElementById("nombre").value.trim();
+  if(!nombre) return alert("Ingresa tu nombre");
+
+  const res = await fetch("http://localhost:3000/login", {
+    method:"POST",
+    headers:{ "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre })
+  });
+  currentUser = await res.json();
+  document.getElementById("loginDiv").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+  document.getElementById("usuarioNombre").innerText = currentUser.nombre;
+  cargarDatos();
+  setInterval(cargarDatos, 1000); // contador en vivo cada segundo
+}
+
+async function registrarEntrada() {
+  if(!currentUser) return;
+  await fetch("http://localhost:3000/entrada", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ userId: currentUser.id })
+  });
+  cargarDatos();
+}
+
+async function registrarSalida() {
+  if(!currentUser) return;
+  await fetch("http://localhost:3000/salida", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ userId: currentUser.id })
+  });
+  cargarDatos();
+}
+
+async function cargarDatos() {
+  const res = await fetch("http://localhost:3000/registros");
+  const registros = await res.json();
+
+  // Turnos
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML="";
+  registros.forEach(r=>{
+    const entrada = new Date(r.entrada).toLocaleString();
+    const salida = r.salida ? new Date(r.salida).toLocaleString() : "-";
+    const tiempo = r.salida ? calcularTiempo(r.entrada,r.salida) : calcularTiempoEnVivo(r.entrada);
+    const clase = !r.salida ? "active":"";
+    tbody.innerHTML += `<tr class="${clase}">
+      <td data-label="Nombre">${r.nombre}</td>
+      <td data-label="Entrada">${entrada}</td>
+      <td data-label="Salida">${salida}</td>
+      <td data-label="Tiempo">${tiempo}</td>
+    </tr>`;
+  });
+
+  // EMS activos
+  const activosUl = document.querySelector("#activos ul");
+  activosUl.innerHTML = "";
+  registros.filter(r => !r.salida).forEach(r=>{
+    activosUl.innerHTML += `<li>${r.nombre} - ${calcularTiempoEnVivo(r.entrada)}</li>`;
+  });
+
+  mostrarAcumulados(registros);
+}
+
+function calcularTiempo(entrada,salida){
+  const diff = new Date(salida)-new Date(entrada);
+  const h=Math.floor(diff/(1000*60*60));
+  const m=Math.floor((diff%(1000*60*60))/(1000*60));
+  return `${h}h ${m}m`;
+}
+
+function calcularTiempoEnVivo(entrada){
+  const diff = new Date()-new Date(entrada);
+  const h=Math.floor(diff/(1000*60*60));
+  const m=Math.floor((diff%(1000*60*60))/(1000*60));
+  return `${h}h ${m}m`;
+}
+
+function mostrarAcumulados(registros){
+  const ahora=new Date();
+  const primerDiaSemana=new Date(ahora);
+  primerDiaSemana.setDate(ahora.getDate()-((ahora.getDay()+6)%7));
+  const primerDiaMes=new Date(ahora.getFullYear(), ahora.getMonth(),1);
+
+  const totales={},semana={},mes={};
+  registros.forEach(r=>{
+    if(!r.salida) return;
+    const tiempo = (new Date(r.salida)-new Date(r.entrada))/(1000*60);
+    if(!totales[r.nombre]) {totales[r.nombre]=0; semana[r.nombre]=0; mes[r.nombre]=0;}
+    totales[r.nombre]+=tiempo;
+    const inicio = new Date(r.entrada);
+    if(inicio>=primerDiaSemana) semana[r.nombre]+=tiempo;
+    if(inicio>=primerDiaMes) mes[r.nombre]+=tiempo;
+  });
+
+  const tbodyA=document.getElementById("tbodyAcumulado");
+  tbodyA.innerHTML="";
+  for(const nombre in totales){
+    tbodyA.innerHTML+=`<tr>
+      <td data-label="Nombre">${nombre}</td>
+      <td data-label="Total">${formatearTiempo(totales[nombre])}</td>
+      <td data-label="Semanal">${formatearTiempo(semana[nombre])}</td>
+      <td data-label="Mensual">${formatearTiempo(mes[nombre])}</td>
+    </tr>`;
+  }
+}
+
+function formatearTiempo(minutos){
+  if(!minutos || minutos<=0) return "-";
+  const h=Math.floor(minutos/60);
+  const m=Math.floor(minutos%60);
+  return `${h}h ${m}m`;
+}
+</script>
+</body>
+</html>
