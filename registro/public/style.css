@@ -129,7 +129,7 @@ button {
     border-radius: 8px;
     cursor: pointer;
     transition: background 0.3s, transform 0.1s;
-    color: white;
+    color: #3B82F6;
 }
 
 button:hover { 
