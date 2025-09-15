@@ -113,7 +113,11 @@ app.get("/contador-semanal/:userId", async (req, res) => {
     if (!userId) return res.status(400).send({ error: "userId requerido" });
 
     const ahora = new Date();
-    const primerDiaSemana = new Date(ahora.setDate(ahora.getDate() - ahora.getDay()));
+
+    // calcular el lunes de esta semana
+    const dia = ahora.getDay(); // 0 = domingo, 1 = lunes, ...
+    const diff = dia === 0 ? 6 : dia - 1; // si es domingo, retroceder 6 días
+    const primerDiaSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diff, 0, 0, 0);
 
     try {
         const registros = await Registro.find({
