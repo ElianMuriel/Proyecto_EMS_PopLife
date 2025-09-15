@@ -52,7 +52,6 @@
     }
 
     @media(max-width:600px) {
-
       th,
       td {
         font-size: 0.9rem;
@@ -72,11 +71,13 @@
   </header>
   <main>
 
+    <!-- LOGIN -->
     <div id="loginDiv">
       <input type="text" id="nombre" placeholder="Ingresa tu nombre">
       <button onclick="login()">Entrar</button>
     </div>
 
+    <!-- CONTROL DIARIO -->
     <div id="controlDiv" style="display:none;">
       <h2>Bienvenido, <span id="userName"></span></h2>
       <button onclick="marcarEntrada()">Registrar Entrada</button>
@@ -102,8 +103,10 @@
       </div>
     </div>
 
+    <!-- RESUMEN SEMANAL / MENSUAL -->
     <div id="resumenDiv">
       <button onclick="volverRegistro()">Volver a Registro Diario</button>
+
       <h3>Resumen Semanal</h3>
       <table>
         <thead>
@@ -135,7 +138,11 @@
         if (!nombre) { alert("Ingresa tu nombre"); return; }
 
         try {
-          const res = await fetch("/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nombre }) });
+          const res = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre })
+          });
           user = await res.json();
           document.getElementById("userName").textContent = user.nombre;
           document.getElementById("loginDiv").style.display = "none";
@@ -149,14 +156,22 @@
 
       async function marcarEntrada() {
         if (!user) return;
-        await fetch("/entrada", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user._id }) });
+        await fetch("/entrada", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user._id })
+        });
         cargarRegistrosHoy();
         actualizarContadores();
       }
 
       async function marcarSalida() {
         if (!user) return;
-        await fetch("/salida", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user._id }) });
+        await fetch("/salida", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user._id })
+        });
         cargarRegistrosHoy();
         actualizarContadores();
       }
@@ -187,47 +202,35 @@
         const resSemana = await fetch(`/contador-semanal/${user._id}`);
         const dataSemana = await resSemana.json();
         document.getElementById("horasSemana").textContent = dataSemana.horas;
+
         const resMes = await fetch(`/contador-mensual/${user._id}`);
         const dataMes = await resMes.json();
         document.getElementById("horasMes").textContent = dataMes.horas;
       }
 
-      // --- Vista resumen ---
+      // --- VISTA RESUMEN ---
       async function mostrarVistaResumen() {
         document.getElementById("controlDiv").style.display = "none";
         document.getElementById("resumenDiv").style.display = "block";
 
-        const res = await fetch("/registros");
-        const registros = await res.json();
+        // Traer resúmenes desde backend
+        const resSemana = await fetch("/resumen-semanal");
+        const resumenSemana = await resSemana.json();
+
+        const resMes = await fetch("/resumen-mensual");
+        const resumenMes = await resMes.json();
 
         const tbodySemana = document.getElementById("tbodySemana");
         const tbodyMes = document.getElementById("tbodyMes");
         tbodySemana.innerHTML = "";
         tbodyMes.innerHTML = "";
 
-        const ahora = new Date();
-        const primerDiaSemana = new Date(ahora.setDate(ahora.getDate() - ahora.getDay()));
-        const primerDiaMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-
-        const acumuladoSemana = {};
-        const acumuladoMes = {};
-
-        registros.forEach(r => {
-          const horas = calcularHoras(r.entrada, r.salida);
-          if (!acumuladoMes[r.nombre]) acumuladoMes[r.nombre] = 0;
-          if (!acumuladoSemana[r.nombre]) acumuladoSemana[r.nombre] = 0;
-
-          const inicio = new Date(r.entrada);
-          acumuladoMes[r.nombre] += parseFloat(horas);
-          if (inicio >= primerDiaSemana) acumuladoSemana[r.nombre] += parseFloat(horas);
+        resumenSemana.forEach(r => {
+          tbodySemana.innerHTML += `<tr><td>${r.nombre}</td><td>${r.horas}</td></tr>`;
         });
-
-        for (const [nombre, h] of Object.entries(acumuladoSemana)) {
-          tbodySemana.innerHTML += `<tr><td>${nombre}</td><td>${h.toFixed(2)}</td></tr>`;
-        }
-        for (const [nombre, h] of Object.entries(acumuladoMes)) {
-          tbodyMes.innerHTML += `<tr><td>${nombre}</td><td>${h.toFixed(2)}</td></tr>`;
-        }
+        resumenMes.forEach(r => {
+          tbodyMes.innerHTML += `<tr><td>${r.nombre}</td><td>${r.horas}</td></tr>`;
+        });
       }
 
       function volverRegistro() {
@@ -237,7 +240,10 @@
         actualizarContadores();
       }
 
-      window.onload = () => { cargarRegistrosHoy(); actualizarContadores(); }
+      window.onload = () => {
+        cargarRegistrosHoy();
+        actualizarContadores();
+      }
     </script>
   </main>
 </body>

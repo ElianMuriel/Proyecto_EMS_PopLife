@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
+const cron = require("node-cron");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,15 +31,25 @@ const RegistroSchema = new mongoose.Schema({
     salida: { type: Date }
 });
 
+// Modelo para guardar resúmenes semanales/mensuales
+const ResumenSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    periodo: { type: String, enum: ["semana", "mes"], required: true },
+    inicio: { type: Date, required: true },
+    fin: { type: Date },
+    horas: { type: Number, default: 0 }
+});
+
 const User = mongoose.model("User", UserSchema);
 const Registro = mongoose.model("Registro", RegistroSchema);
+const Resumen = mongoose.model("Resumen", ResumenSchema);
 
 // --- FUNCIONES UTILES ---
 function calcularHorasTotales(registros) {
     let total = 0;
     registros.forEach(r => {
         if (r.entrada && r.salida) {
-            total += (r.salida - r.entrada) / 1000 / 60 / 60; // de ms a horas
+            total += (r.salida - r.entrada) / 1000 / 60 / 60;
         }
     });
     return total.toFixed(2);
@@ -107,16 +118,14 @@ app.get("/registros", async (req, res) => {
     }
 });
 
-// Contador semanal
+// Contador semanal (solo de la semana actual)
 app.get("/contador-semanal/:userId", async (req, res) => {
     const { userId } = req.params;
     if (!userId) return res.status(400).send({ error: "userId requerido" });
 
     const ahora = new Date();
-
-    // calcular el lunes de esta semana
-    const dia = ahora.getDay(); // 0 = domingo, 1 = lunes, ...
-    const diff = dia === 0 ? 6 : dia - 1; // si es domingo, retroceder 6 días
+    const dia = ahora.getDay();
+    const diff = dia === 0 ? 6 : dia - 1;
     const primerDiaSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diff, 0, 0, 0);
 
     try {
@@ -153,12 +162,12 @@ app.get("/contador-mensual/:userId", async (req, res) => {
     }
 });
 
-// Reinicio mensual automático de registros antiguos
+// --- FUNCIONES DE REINICIO ---
+// Reinicio mensual (elimina registros antiguos para ahorrar espacio)
 async function reinicioMensual() {
     try {
         const ahora = new Date();
         const primerDiaMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-        // Elimina registros anteriores al primer día del mes actual
         await Registro.deleteMany({ entrada: { $lt: primerDiaMes } });
         console.log("Reinicio mensual: registros antiguos eliminados");
     } catch (err) {
@@ -166,11 +175,55 @@ async function reinicioMensual() {
     }
 }
 
-// Ejecutar al iniciar el servidor
-reinicioMensual();
+// Reinicio semanal (guardar resumen y reiniciar contador semanal)
+async function reinicioSemanal() {
+    try {
+        const ahora = new Date();
+        const dia = ahora.getDay(); // 0 = domingo
+        const diff = dia === 0 ? 6 : dia - 1; // retroceder hasta lunes
+        const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diff, 0, 0, 0);
 
-// Con node-cron para ejecutarlo el primer día de cada mes a medianoche
-const cron = require("node-cron");
+        // Obtener registros de la semana pasada
+        const registros = await Registro.find({ 
+            entrada: { $lt: inicioSemana },
+            salida: { $ne: null }
+        }).populate("userId");
+
+        const horasPorUsuario = {};
+        registros.forEach(r => {
+            const horas = (r.salida - r.entrada) / 1000 / 60 / 60;
+            if (!horasPorUsuario[r.userId._id]) horasPorUsuario[r.userId._id] = 0;
+            horasPorUsuario[r.userId._id] += horas;
+        });
+
+        // Guardar resúmenes semanales
+        for (const [userId, horas] of Object.entries(horasPorUsuario)) {
+            await Resumen.create({
+                userId,
+                periodo: "semana",
+                inicio: inicioSemana,
+                fin: ahora,
+                horas
+            });
+        }
+
+        console.log("Reinicio semanal completado");
+    } catch (err) {
+        console.error("Error en reinicio semanal:", err);
+    }
+}
+
+// Ejecutar reinicio mensual y semanal al iniciar el servidor
+reinicioMensual();
+reinicioSemanal();
+
+// --- CRON ---
+// Cada lunes a medianoche
+cron.schedule("0 0 * * 1", () => {
+    reinicioSemanal();
+});
+
+// Cada 1 del mes a medianoche
 cron.schedule("0 0 1 * *", () => {
     reinicioMensual();
 });
@@ -179,4 +232,5 @@ cron.schedule("0 0 1 * *", () => {
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "registro.html"));
 });
+
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
