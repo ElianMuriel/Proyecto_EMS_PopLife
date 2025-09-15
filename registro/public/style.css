@@ -1,45 +1,10 @@
-/* Login centrado */
-#loginDiv {
-    max-width: 500px;
-    margin: 5rem auto;
-    padding: 2rem;
-    background: #1E3A8A; /* azul EMS fuerte */
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-    text-align: center;
-    color: #FFFFFF; /* texto blanco */
-}
-
-/* Ajustar imagen logo */
-#loginDiv img {
-    display: block;
-    margin: 0 auto 3rem auto;
-    max-width: 1000px;
-    border-radius: 50px;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); /* brillo azul */
-}
-
-#loginDiv input {
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    border: 1px solid #3B82F6; /* azul claro */
-    border-radius: 5px;
-}
-
-/* Botón login */
-#loginDiv button {
-    margin-top: 0.5rem;
-    background-color: #3B82F6; /* azul claro */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-}
-#loginDiv button:hover {
-    background-color: #1E40AF; /* azul más oscuro al hover */
+/* ===== FONDO GENERAL ===== */
+body {
+    background: linear-gradient(135deg, #0D1B4C, #1E3A8A); /* degradado azul oscuro */
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    color: #FFFFFF;
 }
 
 /* Ocultar secciones por defecto */
@@ -48,36 +13,62 @@
     display: none;
 }
 
-/* CONTROL DIARIO */
-#controlDiv {
+/* ===== CUADROS PRINCIPALES ===== */
+#loginDiv,
+#controlDiv,
+#resumenDiv {
     max-width: 900px;
     margin: 2rem auto;
     padding: 2rem;
-    background: #1E3A8A; /* mismo azul EMS */
+    background: rgba(30, 58, 138, 0.85); /* azul EMS semitransparente */
+    backdrop-filter: blur(10px); /* efecto vidrio */
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
-    color: #FFFFFF;
     text-align: center;
 }
 
-#controlDiv h2 {
-    margin-bottom: 1rem;
-    color: #ffffff; /* azul claro como acento */
+/* ===== LOGIN ===== */
+#loginDiv {
+    max-width: 500px;
+    margin: 5rem auto;
 }
 
-#controlDiv button {
-    margin: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: #3B82F6; /* azul claro */
+#loginDiv img {
+    display: block;
+    margin: 0 auto 2rem auto;
+    max-width: 200px;
+    border-radius: 50px;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+#loginDiv input {
+    width: 80%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #3B82F6;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+#loginDiv button {
+    background-color: #3B82F6;
     color: white;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
+    padding: 0.5rem 1.5rem;
     font-weight: bold;
+    cursor: pointer;
     transition: background 0.3s;
 }
-#controlDiv button:hover {
-    background-color: #1E40AF; /* hover más oscuro */
+
+#loginDiv button:hover {
+    background-color: #1E40AF;
+}
+
+/* ===== CONTROL DIARIO ===== */
+#controlDiv h2 {
+    margin-bottom: 1rem;
+    color: #FFD700; /* dorado para el nombre del usuario */
 }
 
 #controlDiv table {
@@ -85,50 +76,25 @@
     border-collapse: collapse;
     margin-top: 1rem;
     text-align: center;
-    background-color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(5px);
     color: #1E3A8A;
 }
 
 #controlDiv th, #controlDiv td {
     padding: 0.5rem;
-    border: 1px solid #E5E7EB; /* gris claro */
+    border: 1px solid #E5E7EB;
 }
 
 #controlDiv th {
     background-color: #3B82F6;
-    color: #FFFFFF;
+    color: white;
 }
 
-/* RESUMEN SEMANAL / MENSUAL */
-#resumenDiv {
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: #1E3A8A;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-    color: #FFFFFF;
-    text-align: center;
-}
-
+/* ===== RESUMEN SEMANAL / MENSUAL ===== */
 #resumenDiv h3 {
     margin-top: 1.5rem;
-    color: #3B82F6; /* títulos resaltados */
-}
-
-#resumenDiv button {
-    margin-bottom: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: #3B82F6;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-}
-#resumenDiv button:hover {
-    background-color: #1E40AF;
+    color: #FFD700;
 }
 
 #resumenDiv table {
@@ -136,7 +102,8 @@
     border-collapse: collapse;
     margin-top: 1rem;
     text-align: center;
-    background-color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(5px);
     color: #1E3A8A;
 }
 
@@ -147,27 +114,31 @@
 
 #resumenDiv th {
     background-color: #3B82F6;
-    color: #FFFFFF;
+    color: white;
 }
 
-/* Estilo base para todos los botones */
+/* ===== BOTONES ===== */
 button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s, transform 0.1s;
-  color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.1s;
+    color: white;
 }
 
-/* Hover y activo */
-button:hover { opacity: 0.9; transform: scale(1.03); }
-button:active { transform: scale(0.97); }
+button:hover { 
+    opacity: 0.9; 
+    transform: scale(1.03); 
+}
+button:active { 
+    transform: scale(0.97); 
+}
 
 /* Botones específicos */
 .btn-entrada { background-color: #28a745; } /* verde */

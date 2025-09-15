@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro EMS</title>
   <link rel="stylesheet" href="style.css">
-
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="ems_logo.png">
 </head>
@@ -15,21 +14,22 @@
   <main>
 
     <!-- LOGIN -->
-    <div id="loginDiv">
+    <section id="loginDiv">
       <header>
         <h1>Registro EMS</h1>
       </header>
       <img src="ems_logo.png" alt="EMS Logo" width="150">
-      <input type="text" id="nombre" placeholder="Ingresa tu nombre">
-      <button onclick="login()">Entrar</button>
-    </div>
+      <input type="text" id="nombre" placeholder="Ingresa tu nombre" autocomplete="off">
+      <button onclick="login()" aria-label="Entrar al sistema">Entrar</button>
+      <p id="errorMsg" style="color:#ff5555; margin-top:0.5rem;"></p>
+    </section>
 
     <!-- CONTROL DIARIO -->
-    <div id="controlDiv" style="display:none;">
+    <section id="controlDiv" style="display:none;">
       <h2>Bienvenido, <span id="userName"></span></h2>
-      <button class="btn-entrada" onclick="marcarEntrada()">🟢 Entrada</button>
-      <button class="btn-salida" onclick="marcarSalida()">🔴 Salida</button>
-      <button class="btn-resumen" onclick="mostrarVistaResumen()">📊 Resumen Semana/Mes</button>
+      <button class="btn-entrada" onclick="marcarEntrada()" aria-label="Marcar entrada">🟢 Entrada</button>
+      <button class="btn-salida" onclick="marcarSalida()" aria-label="Marcar salida">🔴 Salida</button>
+      <button class="btn-resumen" onclick="mostrarVistaResumen()" aria-label="Ver resumen">📊 Resumen Semana / Mes</button>
 
       <h3>Registros de hoy</h3>
       <table>
@@ -48,11 +48,11 @@
         <p>Horas esta semana: <span id="horasSemana">0</span></p>
         <p>Horas este mes: <span id="horasMes">0</span></p>
       </div>
-    </div>
+    </section>
 
     <!-- RESUMEN SEMANAL / MENSUAL -->
-    <div id="resumenDiv">
-      <button onclick="volverRegistro()">Volver a Registro Diario</button>
+    <section id="resumenDiv">
+      <button onclick="volverRegistro()" aria-label="Volver a registro diario">Volver a Registro Diario</button>
 
       <h3>Resumen Semanal</h3>
       <table>
@@ -75,14 +75,19 @@
         </thead>
         <tbody id="tbodyMes"></tbody>
       </table>
-    </div>
+    </section>
 
     <script>
       let user = null;
 
       async function login() {
         const nombre = document.getElementById("nombre").value.trim();
-        if (!nombre) { alert("Ingresa tu nombre"); return; }
+        const errorMsg = document.getElementById("errorMsg");
+        errorMsg.textContent = "";
+        if (!nombre) { 
+          errorMsg.textContent = "Ingresa tu nombre"; 
+          return; 
+        }
 
         try {
           const res = await fetch("/login", {
@@ -97,7 +102,8 @@
           cargarRegistrosHoy();
           actualizarContadores();
         } catch (err) {
-          console.error(err); alert("Error al iniciar sesión");
+          console.error(err); 
+          errorMsg.textContent = "Error al iniciar sesión";
         }
       }
 
@@ -147,18 +153,15 @@
 
       async function actualizarContadores() {
         if (!user) return;
-        // Contador semanal
         const resSemana = await fetch(`/contador-semanal/${user._id}`);
         const dataSemana = await resSemana.json();
         document.getElementById("horasSemana").textContent = dataSemana.horas;
 
-        // Contador mensual
         const resMes = await fetch(`/contador-mensual/${user._id}`);
         const dataMes = await resMes.json();
         document.getElementById("horasMes").textContent = dataMes.horas;
       }
 
-      // --- VISTA RESUMEN ---
       async function mostrarVistaResumen() {
         document.getElementById("controlDiv").style.display = "none";
         document.getElementById("resumenDiv").style.display = "block";
