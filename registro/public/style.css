@@ -1,35 +1,99 @@
-/* Login centrado */
-#loginDiv {
-    max-width: 500px;
-    margin: 5rem auto;
+/* CONTROL DIARIO */
+#controlDiv {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #060863; /* mismo fondo que login */
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    color: aliceblue;
+    text-align: center;
+}
+
+#controlDiv h2 {
+    margin-bottom: 1rem;
+    color: #FFD700; /* dorado para resaltar el nombre */
+}
+
+#controlDiv button {
+    margin: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: rgb(87, 175, 46); /* verde como login */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+#controlDiv button:hover {
+    background-color: rgb(70, 140, 35);
+}
+
+#controlDiv table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+#controlDiv th, #controlDiv td {
+    padding: 0.5rem;
+    border: 1px solid #444;
+}
+
+#controlDiv th {
+    background-color: #0A0A5C;
+    color: #FFD700;
+}
+
+/* RESUMEN SEMANAL / MENSUAL */
+#resumenDiv {
+    max-width: 900px;
+    margin: 2rem auto;
     padding: 2rem;
     background: #060863;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
-    text-align: center;
     color: aliceblue;
+    text-align: center;
 }
 
-/* Ajustar imagen logo */
-#loginDiv img {
-    display: block;
-    margin: 0 auto 3rem auto;
-    max-width: 1000px;
-    border-radius: 50px;
-    box-shadow: 0 0 10px rgba(182, 16, 4, 0.5);
+#resumenDiv h3 {
+    margin-top: 1.5rem;
+    color: #FFD700;
 }
 
-#loginDiv input {
+#resumenDiv button {
     margin-bottom: 1rem;
-}
-
-#loginDiv button {
-    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
     background-color: rgb(87, 175, 46);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
 }
 
-/* Ocultar secciones por defecto */
-#controlDiv,
-#resumenDiv {
-    display: none;
+#resumenDiv button:hover {
+    background-color: rgb(70, 140, 35);
+}
+
+#resumenDiv table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+#resumenDiv th, #resumenDiv td {
+    padding: 0.5rem;
+    border: 1px solid #444;
+}
+
+#resumenDiv th {
+    background-color: #0A0A5C;
+    color: #FFD700;
 }
