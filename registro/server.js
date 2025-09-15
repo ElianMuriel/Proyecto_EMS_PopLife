@@ -149,8 +149,30 @@ app.get("/contador-mensual/:userId", async (req, res) => {
     }
 });
 
+// Reinicio mensual automático de registros antiguos
+async function reinicioMensual() {
+    try {
+        const ahora = new Date();
+        const primerDiaMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+        // Elimina registros anteriores al primer día del mes actual
+        await Registro.deleteMany({ entrada: { $lt: primerDiaMes } });
+        console.log("Reinicio mensual: registros antiguos eliminados");
+    } catch (err) {
+        console.error("Error en reinicio mensual:", err);
+    }
+}
+
+// Ejecutar al iniciar el servidor
+reinicioMensual();
+
+// Con node-cron para ejecutarlo el primer día de cada mes a medianoche
+const cron = require("node-cron");
+cron.schedule("0 0 1 * *", () => {
+    reinicioMensual();
+});
+
 // --- INICIO DEL SERVIDOR ---
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "registro.html"));
+    res.sendFile(path.join(__dirname, "public", "registro.html"));
 });
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));

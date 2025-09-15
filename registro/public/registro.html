@@ -1,238 +1,245 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro EMS</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background:#f5f5f5; }
-  header { background:#333; color:white; padding:1rem; text-align:center; }
-  main { padding:1rem; max-width:900px; margin: auto; }
-  input, button { padding:0.5rem; margin:0.3rem 0; width:100%; box-sizing:border-box; }
-  table { width:100%; border-collapse: collapse; margin-top:1rem; }
-  th, td { padding:0.5rem; border:1px solid #ccc; text-align:left; }
-  .hidden { display:none; }
-  @media (max-width:600px){
-    th, td { font-size:0.9rem; }
-    button, input { font-size:1rem; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro EMS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: #333;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    main {
+      padding: 1rem;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    input,
+    button {
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th,
+    td {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    #resumenDiv {
+      display: none;
+    }
+
+    @media(max-width:600px) {
+
+      th,
+      td {
+        font-size: 0.9rem;
+      }
+
+      button,
+      input {
+        font-size: 1rem;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<header>
-  <h1>Registro EMS</h1>
-</header>
+  <header>
+    <h1>Registro EMS</h1>
+  </header>
+  <main>
 
-<main>
-  <!-- LOGIN -->
-  <div id="loginDiv">
-    <input type="text" id="nombre" placeholder="Ingresa tu nombre">
-    <button onclick="login()">Entrar</button>
-  </div>
+    <div id="loginDiv">
+      <input type="text" id="nombre" placeholder="Ingresa tu nombre">
+      <button onclick="login()">Entrar</button>
+    </div>
 
-  <!-- CONTROL DIARIO -->
-  <div id="controlDiv" class="hidden">
-    <h2>Bienvenido, <span id="userName"></span></h2>
-    <button onclick="marcarEntrada()">Registrar Entrada</button>
-    <button onclick="marcarSalida()">Registrar Salida</button>
-    <button onclick="mostrarResumen()">Ver Resumen Semanal/Mensual</button>
+    <div id="controlDiv" style="display:none;">
+      <h2>Bienvenido, <span id="userName"></span></h2>
+      <button onclick="marcarEntrada()">Registrar Entrada</button>
+      <button onclick="marcarSalida()">Registrar Salida</button>
+      <button onclick="mostrarVistaResumen()">Ver Resumen Semana/Mes</button>
 
-    <h3>Registro de Hoy</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Entrada</th>
-          <th>Salida</th>
-          <th>Horas</th>
-        </tr>
-      </thead>
-      <tbody id="registrosHoyBody"></tbody>
-    </table>
-  </div>
+      <h3>Registros de hoy</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Horas del turno</th>
+          </tr>
+        </thead>
+        <tbody id="registrosBody"></tbody>
+      </table>
 
-  <!-- RESUMEN SEMANAL/MENSUAL -->
-  <div id="resumenDiv" class="hidden">
-    <h2>Resumen Semanal y Mensual</h2>
-    <button onclick="volverAlDiario()">Volver al Registro Diario</button>
+      <div style="margin-top:1rem;">
+        <p>Horas esta semana: <span id="horasSemana">0</span></p>
+        <p>Horas este mes: <span id="horasMes">0</span></p>
+      </div>
+    </div>
 
-    <h3>Horas Diarias</h3>
-    <table>
-      <thead>
-        <tr><th>Nombre</th><th>Horas Hoy</th></tr>
-      </thead>
-      <tbody id="tbodyHoyResumen"></tbody>
-    </table>
+    <div id="resumenDiv">
+      <button onclick="volverRegistro()">Volver a Registro Diario</button>
+      <h3>Resumen Semanal</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Horas Semana</th>
+          </tr>
+        </thead>
+        <tbody id="tbodySemana"></tbody>
+      </table>
 
-    <h3>Horas Semanales</h3>
-    <table>
-      <thead>
-        <tr><th>Nombre</th><th>Horas Semana</th></tr>
-      </thead>
-      <tbody id="tbodySemana"></tbody>
-    </table>
+      <h3>Resumen Mensual</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Horas Mes</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyMes"></tbody>
+      </table>
+    </div>
 
-    <h3>Horas Mensuales</h3>
-    <table>
-      <thead>
-        <tr><th>Nombre</th><th>Horas Mes</th></tr>
-      </thead>
-      <tbody id="tbodyMes"></tbody>
-    </table>
-  </div>
-</main>
+    <script>
+      let user = null;
 
-<script>
-let user = null;
-let intervaloTiempo = null;
+      async function login() {
+        const nombre = document.getElementById("nombre").value.trim();
+        if (!nombre) { alert("Ingresa tu nombre"); return; }
 
-async function login(){
-  const nombre = document.getElementById("nombre").value.trim();
-  if(!nombre){ alert("Ingresa tu nombre"); return; }
-
-  try{
-    const res = await fetch("/login", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({nombre})
-    });
-    user = await res.json();
-    document.getElementById("userName").textContent = user.nombre;
-    document.getElementById("loginDiv").classList.add("hidden");
-    document.getElementById("controlDiv").classList.remove("hidden");
-    cargarRegistrosHoy();
-  }catch(err){
-    console.error(err);
-    alert("Error al iniciar sesión");
-  }
-}
-
-async function marcarEntrada(){
-  if(!user) return;
-  await fetch("/entrada", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({userId:user._id})
-  });
-  cargarRegistrosHoy();
-}
-
-async function marcarSalida(){
-  if(!user) return;
-  await fetch("/salida", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({userId:user._id})
-  });
-  cargarRegistrosHoy();
-}
-
-async function cargarRegistrosHoy() {
-  const res = await fetch("/registros");
-  const registros = await res.json();
-  const hoy = new Date();
-  const tbody = document.getElementById("registrosHoyBody");
-  tbody.innerHTML = "";
-  let totalHorasHoy = 0;
-  let ultimaFilaActiva = null;
-  let ultimaEntrada = null;
-
-  registros
-    .filter(r => r.nombre === user.nombre)
-    .forEach(r => {
-      const entrada = new Date(r.entrada);
-      const salida = r.salida ? new Date(r.salida) : null;
-      if (entrada.toDateString() === hoy.toDateString()) {
-        const horas = salida ? ((salida - entrada) / 1000 / 60 / 60) : 0;
-        totalHorasHoy += horas;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${entrada.toLocaleTimeString()}</td>
-                        <td>${salida ? salida.toLocaleTimeString() : "-"}</td>
-                        <td class="horas">${horas.toFixed(2)}</td>`;
-        tbody.appendChild(tr);
-
-        if (!salida) {
-          ultimaEntrada = entrada;
-          ultimaFilaActiva = tr.querySelector(".horas");
+        try {
+          const res = await fetch("/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nombre }) });
+          user = await res.json();
+          document.getElementById("userName").textContent = user.nombre;
+          document.getElementById("loginDiv").style.display = "none";
+          document.getElementById("controlDiv").style.display = "block";
+          cargarRegistrosHoy();
+          actualizarContadores();
+        } catch (err) {
+          console.error(err); alert("Error al iniciar sesión");
         }
       }
-    });
 
-  // Fila total
-  const trTotal = document.createElement("tr");
-  trTotal.style.fontWeight = "bold";
-  trTotal.innerHTML = `<td colspan="2">Total hoy</td>
-                       <td id="totalHoy">${totalHorasHoy.toFixed(2)}</td>`;
-  tbody.appendChild(trTotal);
+      async function marcarEntrada() {
+        if (!user) return;
+        await fetch("/entrada", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user._id }) });
+        cargarRegistrosHoy();
+        actualizarContadores();
+      }
 
-  if (intervaloTiempo) clearInterval(intervaloTiempo);
-  if (ultimaEntrada && ultimaFilaActiva) {
-    intervaloTiempo = setInterval(() => {
-      const ahora = new Date();
-      const diffHoras = (ahora - ultimaEntrada) / 1000 / 60 / 60;
-      ultimaFilaActiva.textContent = diffHoras.toFixed(2);
-      document.getElementById("totalHoy").textContent = (totalHorasHoy + diffHoras).toFixed(2);
-    }, 1000);
-  }
-}
+      async function marcarSalida() {
+        if (!user) return;
+        await fetch("/salida", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user._id }) });
+        cargarRegistrosHoy();
+        actualizarContadores();
+      }
 
-async function mostrarResumen(){
-  document.getElementById("controlDiv").classList.add("hidden");
-  document.getElementById("resumenDiv").classList.remove("hidden");
+      function calcularHoras(entrada, salida) {
+        if (!entrada || !salida) return 0;
+        return ((new Date(salida) - new Date(entrada)) / 1000 / 60 / 60).toFixed(2);
+      }
 
-  const res = await fetch("/registros");
-  const registros = await res.json();
-  const ahora = new Date();
-  const hoyStr = ahora.toDateString();
+      async function cargarRegistrosHoy() {
+        const res = await fetch("/registros");
+        const registros = await res.json();
+        const tbody = document.getElementById("registrosBody");
+        tbody.innerHTML = "";
+        const hoy = new Date().toDateString();
+        registros.filter(r => new Date(r.entrada).toDateString() === hoy).forEach(r => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${r.nombre}</td>
+                    <td>${new Date(r.entrada).toLocaleTimeString()}</td>
+                    <td>${r.salida ? new Date(r.salida).toLocaleTimeString() : "-"}</td>
+                    <td>${calcularHoras(r.entrada, r.salida)}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
 
-  // Inicializar acumulados
-  const acumuladosHoy = {};
-  const acumuladosSemana = {};
-  const acumuladosMes = {};
-  const primerDiaSemana = new Date(ahora);
-  primerDiaSemana.setDate(ahora.getDate() - ((ahora.getDay() + 6) % 7)); // lunes
-  const primerDiaMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      async function actualizarContadores() {
+        if (!user) return;
+        const resSemana = await fetch(`/contador-semanal/${user._id}`);
+        const dataSemana = await resSemana.json();
+        document.getElementById("horasSemana").textContent = dataSemana.horas;
+        const resMes = await fetch(`/contador-mensual/${user._id}`);
+        const dataMes = await resMes.json();
+        document.getElementById("horasMes").textContent = dataMes.horas;
+      }
 
-  registros.forEach(r => {
-    const nombre = r.nombre;
-    const entrada = new Date(r.entrada);
-    const salida = r.salida ? new Date(r.salida) : new Date();
-    const horas = (salida - entrada)/1000/60/60;
+      // --- Vista resumen ---
+      async function mostrarVistaResumen() {
+        document.getElementById("controlDiv").style.display = "none";
+        document.getElementById("resumenDiv").style.display = "block";
 
-    if (!acumuladosHoy[nombre]) acumuladosHoy[nombre] = 0;
-    if (!acumuladosSemana[nombre]) acumuladosSemana[nombre] = 0;
-    if (!acumuladosMes[nombre]) acumuladosMes[nombre] = 0;
+        const res = await fetch("/registros");
+        const registros = await res.json();
 
-    if (entrada.toDateString() === hoyStr) acumuladosHoy[nombre] += horas;
-    if (entrada >= primerDiaSemana) acumuladosSemana[nombre] += horas;
-    if (entrada >= primerDiaMes) acumuladosMes[nombre] += horas;
-  });
+        const tbodySemana = document.getElementById("tbodySemana");
+        const tbodyMes = document.getElementById("tbodyMes");
+        tbodySemana.innerHTML = "";
+        tbodyMes.innerHTML = "";
 
-  // Cargar tablas
-  const tbodyHoy = document.getElementById("tbodyHoyResumen");
-  tbodyHoy.innerHTML = "";
-  for (const [nombre, horas] of Object.entries(acumuladosHoy)) {
-    tbodyHoy.innerHTML += `<tr><td>${nombre}</td><td>${horas.toFixed(2)}</td></tr>`;
-  }
+        const ahora = new Date();
+        const primerDiaSemana = new Date(ahora.setDate(ahora.getDate() - ahora.getDay()));
+        const primerDiaMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
 
-  const tbodySemana = document.getElementById("tbodySemana");
-  tbodySemana.innerHTML = "";
-  for (const [nombre, horas] of Object.entries(acumuladosSemana)) {
-    tbodySemana.innerHTML += `<tr><td>${nombre}</td><td>${horas.toFixed(2)}</td></tr>`;
-  }
+        const acumuladoSemana = {};
+        const acumuladoMes = {};
 
-  const tbodyMes = document.getElementById("tbodyMes");
-  tbodyMes.innerHTML = "";
-  for (const [nombre, horas] of Object.entries(acumuladosMes)) {
-    tbodyMes.innerHTML += `<tr><td>${nombre}</td><td>${horas.toFixed(2)}</td></tr>`;
-  }
-}
+        registros.forEach(r => {
+          const horas = calcularHoras(r.entrada, r.salida);
+          if (!acumuladoMes[r.nombre]) acumuladoMes[r.nombre] = 0;
+          if (!acumuladoSemana[r.nombre]) acumuladoSemana[r.nombre] = 0;
 
-function volverAlDiario(){
-  document.getElementById("resumenDiv").classList.add("hidden");
-  document.getElementById("controlDiv").classList.remove("hidden");
-  cargarRegistrosHoy();
-}
-</script>
+          const inicio = new Date(r.entrada);
+          acumuladoMes[r.nombre] += parseFloat(horas);
+          if (inicio >= primerDiaSemana) acumuladoSemana[r.nombre] += parseFloat(horas);
+        });
+
+        for (const [nombre, h] of Object.entries(acumuladoSemana)) {
+          tbodySemana.innerHTML += `<tr><td>${nombre}</td><td>${h.toFixed(2)}</td></tr>`;
+        }
+        for (const [nombre, h] of Object.entries(acumuladoMes)) {
+          tbodyMes.innerHTML += `<tr><td>${nombre}</td><td>${h.toFixed(2)}</td></tr>`;
+        }
+      }
+
+      function volverRegistro() {
+        document.getElementById("resumenDiv").style.display = "none";
+        document.getElementById("controlDiv").style.display = "block";
+        cargarRegistrosHoy();
+        actualizarContadores();
+      }
+
+      window.onload = () => { cargarRegistrosHoy(); actualizarContadores(); }
+    </script>
+  </main>
 </body>
+
 </html>
