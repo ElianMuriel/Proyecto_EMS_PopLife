@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro EMS</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="ems_logo.png">
 </head>
 
 <body>
@@ -24,9 +27,9 @@
     <!-- CONTROL DIARIO -->
     <div id="controlDiv" style="display:none;">
       <h2>Bienvenido, <span id="userName"></span></h2>
-      <button onclick="marcarEntrada()">⏱ Entrada</button>
-      <button onclick="marcarSalida()">🏁 Salida</button>
-      <button onclick="mostrarVistaResumen()">Ver Resumen Semana/Mes</button>
+      <button class="btn-entrada" onclick="marcarEntrada()">🟢 Entrada</button>
+      <button class="btn-salida" onclick="marcarSalida()">🔴 Salida</button>
+      <button class="btn-resumen" onclick="mostrarVistaResumen()">📊 Resumen Semana/Mes</button>
 
       <h3>Registros de hoy</h3>
       <table>

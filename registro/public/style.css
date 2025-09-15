@@ -62,7 +62,7 @@
 
 #controlDiv h2 {
     margin-bottom: 1rem;
-    color: #3B82F6; /* azul claro como acento */
+    color: #ffffff; /* azul claro como acento */
 }
 
 #controlDiv button {
@@ -149,3 +149,27 @@
     background-color: #3B82F6;
     color: #FFFFFF;
 }
+
+/* Estilo base para todos los botones */
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.1s;
+  color: white;
+}
+
+/* Hover y activo */
+button:hover { opacity: 0.9; transform: scale(1.03); }
+button:active { transform: scale(0.97); }
+
+/* Botones específicos */
+.btn-entrada { background-color: #28a745; } /* verde */
+.btn-salida  { background-color: #dc3545; } /* rojo */
+.btn-resumen { background-color: #007bff; } /* azul */
