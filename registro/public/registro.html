@@ -7,10 +7,11 @@
 <style>
   body { font-family: Arial, sans-serif; margin: 0; padding: 0; background:#f5f5f5; }
   header { background:#333; color:white; padding:1rem; text-align:center; }
-  main { padding:1rem; max-width:600px; margin: auto; }
+  main { padding:1rem; max-width:800px; margin:auto; }
   input, button { padding:0.5rem; margin:0.3rem 0; width:100%; box-sizing:border-box; }
   table { width:100%; border-collapse: collapse; margin-top:1rem; }
   th, td { padding:0.5rem; border:1px solid #ccc; text-align:left; }
+  button { cursor:pointer; }
   @media (max-width:600px){
     th, td { font-size:0.9rem; }
     button, input { font-size:1rem; }
@@ -21,8 +22,10 @@
 <header>
   <h1>Registro EMS</h1>
 </header>
-
 <main>
+
+<!-- VISTA PERSONAL -->
+<div id="vistaPersonal">
   <div id="loginDiv">
     <input type="text" id="nombre" placeholder="Ingresa tu nombre">
     <button onclick="login()">Entrar</button>
@@ -33,28 +36,41 @@
     <button onclick="marcarEntrada()">Registrar Entrada</button>
     <button onclick="marcarSalida()">Registrar Salida</button>
 
-    <div style="margin-top:1rem;">
-      <p>Horas esta semana: <span id="horasSemana">0</span></p>
-      <p>Horas este mes: <span id="horasMes">0</span></p>
-    </div>
-
-    <h3>Registros</h3>
+    <h3>Mis registros de hoy</h3>
     <table>
       <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Entrada</th>
-          <th>Salida</th>
-        </tr>
+        <tr><th>Entrada</th><th>Salida</th><th>Horas</th></tr>
       </thead>
-      <tbody id="registrosBody"></tbody>
+      <tbody id="registrosHoyBody"></tbody>
     </table>
+
+    <button id="btnVerGeneral" onclick="mostrarVistaGeneral()" style="margin-top:1rem;">
+      Ver Resumen General
+    </button>
   </div>
-</main>
+</div>
+
+<!-- VISTA GENERAL -->
+<div id="vistaGeneral" style="display:none;">
+  <button onclick="mostrarVistaPersonal()">Volver a mi registro</button>
+
+  <h3>Resumen Semanal</h3>
+  <table>
+    <thead><tr><th>Nombre</th><th>Horas Semana</th></tr></thead>
+    <tbody id="tablaSemanal"></tbody>
+  </table>
+
+  <h3>Resumen Mensual</h3>
+  <table>
+    <thead><tr><th>Nombre</th><th>Horas Mes</th></tr></thead>
+    <tbody id="tablaMensual"></tbody>
+  </table>
+</div>
 
 <script>
 let user = null;
 
+// LOGIN
 async function login(){
   const nombre = document.getElementById("nombre").value.trim();
   if(!nombre){ alert("Ingresa tu nombre"); return; }
@@ -69,14 +85,14 @@ async function login(){
     document.getElementById("userName").textContent = user.nombre;
     document.getElementById("loginDiv").style.display = "none";
     document.getElementById("controlDiv").style.display = "block";
-    cargarRegistros();
-    actualizarContadores();
+    cargarRegistrosHoy();
   }catch(err){
     console.error(err);
     alert("Error al iniciar sesión");
   }
 }
 
+// MARCAR ENTRADA Y SALIDA
 async function marcarEntrada(){
   if(!user) return;
   await fetch("/entrada", {
@@ -84,8 +100,7 @@ async function marcarEntrada(){
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({userId:user._id})
   });
-  cargarRegistros();
-  actualizarContadores();
+  cargarRegistrosHoy();
 }
 
 async function marcarSalida(){
@@ -95,35 +110,78 @@ async function marcarSalida(){
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({userId:user._id})
   });
-  cargarRegistros();
-  actualizarContadores();
+  cargarRegistrosHoy();
 }
 
-async function cargarRegistros(){
+// VISTAS
+function mostrarVistaGeneral(){
+  document.getElementById("vistaPersonal").style.display = "none";
+  document.getElementById("vistaGeneral").style.display = "block";
+  cargarResumenGeneral();
+}
+function mostrarVistaPersonal(){
+  document.getElementById("vistaPersonal").style.display = "block";
+  document.getElementById("vistaGeneral").style.display = "none";
+}
+
+// CARGAR REGISTROS DEL DÍA
+async function cargarRegistrosHoy(){
   const res = await fetch("/registros");
   const registros = await res.json();
-  const tbody = document.getElementById("registrosBody");
+  const hoy = new Date();
+  const tbody = document.getElementById("registrosHoyBody");
   tbody.innerHTML = "";
-  registros.forEach(r=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${r.nombre}</td>
-                    <td>${r.entrada ? new Date(r.entrada).toLocaleString() : ""}</td>
-                    <td>${r.salida ? new Date(r.salida).toLocaleString() : ""}</td>`;
-    tbody.appendChild(tr);
-  });
+
+  registros
+    .filter(r => r.userId === user._id)
+    .filter(r => new Date(r.entrada).toDateString() === hoy.toDateString())
+    .forEach(r => {
+      const horas = r.entrada && r.salida ? ((new Date(r.salida) - new Date(r.entrada)) / 1000 / 60 / 60).toFixed(2) : "-";
+      tbody.innerHTML += `<tr>
+        <td>${new Date(r.entrada).toLocaleTimeString()}</td>
+        <td>${r.salida ? new Date(r.salida).toLocaleTimeString() : "-"}</td>
+        <td>${horas}</td>
+      </tr>`;
+    });
 }
 
-async function actualizarContadores(){
-  if(!user) return;
+// CARGAR RESUMEN GENERAL
+async function cargarResumenGeneral(){
+  const res = await fetch("/registros");
+  const registros = await res.json();
 
-  const resSemana = await fetch(`/contador-semanal/${user._id}`);
-  const dataSemana = await resSemana.json();
-  document.getElementById("horasSemana").textContent = dataSemana.horas;
+  const resumenSemana = {};
+  const resumenMes = {};
+  const ahora = new Date();
+  const primerDiaSemana = new Date(ahora);
+  primerDiaSemana.setDate(ahora.getDate() - ahora.getDay());
+  const primerDiaMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
 
-  const resMes = await fetch(`/contador-mensual/${user._id}`);
-  const dataMes = await resMes.json();
-  document.getElementById("horasMes").textContent = dataMes.horas;
+  registros.forEach(r => {
+    const horas = r.entrada && r.salida ? (new Date(r.salida) - new Date(r.entrada))/1000/60/60 : 0;
+    if(!resumenSemana[r.nombre]) resumenSemana[r.nombre] = 0;
+    if(!resumenMes[r.nombre]) resumenMes[r.nombre] = 0;
+
+    const entrada = new Date(r.entrada);
+    if(entrada >= primerDiaSemana) resumenSemana[r.nombre] += horas;
+    if(entrada >= primerDiaMes) resumenMes[r.nombre] += horas;
+  });
+
+  // TABLA SEMANAL
+  const tbodySemana = document.getElementById("tablaSemanal");
+  tbodySemana.innerHTML = "";
+  for(const nombre in resumenSemana){
+    tbodySemana.innerHTML += `<tr><td>${nombre}</td><td>${resumenSemana[nombre].toFixed(2)}</td></tr>`;
+  }
+
+  // TABLA MENSUAL
+  const tbodyMes = document.getElementById("tablaMensual");
+  tbodyMes.innerHTML = "";
+  for(const nombre in resumenMes){
+    tbodyMes.innerHTML += `<tr><td>${nombre}</td><td>${resumenMes[nombre].toFixed(2)}</td></tr>`;
+  }
 }
 </script>
+</main>
 </body>
 </html>
