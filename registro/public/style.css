@@ -1,20 +1,22 @@
 /* Login centrado */
 #loginDiv {
-    max-width: 350px;
+    max-width: 500px;
     margin: 5rem auto;
     padding: 2rem;
-    background: #2c2c2c;
+    background: #060863;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
     text-align: center;
+    color: aliceblue;
 }
 
+/* Ajustar imagen logo */
 #loginDiv img {
     display: block;
-    margin: 0 auto 1.5rem auto;
-    max-width: 120px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    margin: 0 auto 3rem auto;
+    max-width: 1000px;
+    border-radius: 50px;
+    box-shadow: 0 0 10px rgba(182, 16, 4, 0.5);
 }
 
 #loginDiv input {
@@ -23,15 +25,7 @@
 
 #loginDiv button {
     margin-top: 0.5rem;
-}
-
-/* Ajustar imagen logo */
-#loginDiv img {
-    display: block;
-    margin: 0 auto 1.5rem auto;
-    max-width: 120px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    background-color: rgb(87, 175, 46);
 }
 
 /* Ocultar secciones por defecto */
