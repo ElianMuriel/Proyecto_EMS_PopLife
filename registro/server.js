@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(express.static("public"));
 
 // --- CONEXIÓN A MONGODB ---
-const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/ems_registros";
+const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(()=> console.log("Conectado a MongoDB"))
   .catch(err => console.error("Error conectando a MongoDB:", err));
