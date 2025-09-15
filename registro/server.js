@@ -3,6 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -150,6 +151,6 @@ app.get("/contador-mensual/:userId", async (req, res) => {
 
 // --- INICIO DEL SERVIDOR ---
 app.get("/", (req, res) => {
-    res.send("Bienvenido a EMS Registro de Horas!");
+  res.sendFile(path.join(__dirname, "public", "registro.html"));
 });
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
