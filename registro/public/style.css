@@ -91,6 +91,28 @@ body {
     color: white;
 }
 
+/* Botón Salir */
+.btn-salir {
+    background-color: #f97316; /* naranja brillante */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.1s;
+}
+
+.btn-salir:hover {
+    background-color: #ea580c; /* naranja más oscuro al pasar el mouse */
+    transform: scale(1.03);
+}
+
+.btn-salir:active {
+    transform: scale(0.97);
+}
+
+
 /* ===== RESUMEN SEMANAL / MENSUAL ===== */
 #resumenDiv h3 {
     margin-top: 1.5rem;

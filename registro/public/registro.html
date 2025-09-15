@@ -19,7 +19,7 @@
         <h1>Registro EMS</h1>
       </header>
       <img src="ems_logo.png" alt="EMS Logo" width="150">
-      <input type="text" id="nombre" placeholder="Ingresa tu nombre" autocomplete="off">
+      <input type="text" id="nombre" placeholder="Ingresa tu nombre">
       <button onclick="login()" aria-label="Entrar al sistema">Entrar</button>
       <p id="errorMsg" style="color:#ff5555; margin-top:0.5rem;"></p>
     </section>
@@ -29,7 +29,8 @@
       <h2>Bienvenido, <span id="userName"></span></h2>
       <button class="btn-entrada" onclick="marcarEntrada()" aria-label="Marcar entrada">🟢 Entrada</button>
       <button class="btn-salida" onclick="marcarSalida()" aria-label="Marcar salida">🔴 Salida</button>
-      <button class="btn-resumen" onclick="mostrarVistaResumen()" aria-label="Ver resumen">📊 Resumen Semana / Mes</button>
+      <button class="btn-resumen" onclick="mostrarVistaResumen()" aria-label="Ver resumen">📊 Resumen Semana /
+        Mes</button>
 
       <h3>Registros de hoy</h3>
       <table>
@@ -48,6 +49,7 @@
         <p>Horas esta semana: <span id="horasSemana">0</span></p>
         <p>Horas este mes: <span id="horasMes">0</span></p>
       </div>
+      <button class="btn-salir" onclick="salir()">Salir</button>
     </section>
 
     <!-- RESUMEN SEMANAL / MENSUAL -->
@@ -84,9 +86,9 @@
         const nombre = document.getElementById("nombre").value.trim();
         const errorMsg = document.getElementById("errorMsg");
         errorMsg.textContent = "";
-        if (!nombre) { 
-          errorMsg.textContent = "Ingresa tu nombre"; 
-          return; 
+        if (!nombre) {
+          errorMsg.textContent = "Ingresa tu nombre";
+          return;
         }
 
         try {
@@ -102,7 +104,7 @@
           cargarRegistrosHoy();
           actualizarContadores();
         } catch (err) {
-          console.error(err); 
+          console.error(err);
           errorMsg.textContent = "Error al iniciar sesión";
         }
       }
@@ -202,6 +204,19 @@
       window.onload = () => {
         cargarRegistrosHoy();
         actualizarContadores();
+      }
+
+      function salir() {
+        // Ocultar control y resumen
+        document.getElementById("controlDiv").style.display = "none";
+        document.getElementById("resumenDiv").style.display = "none";
+
+        // Mostrar login
+        document.getElementById("loginDiv").style.display = "block";
+
+        // Limpiar campo de nombre y variable user
+        document.getElementById("nombre").value = "";
+        user = null;
       }
     </script>
   </main>
