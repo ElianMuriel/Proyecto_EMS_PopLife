@@ -1,90 +1,27 @@
-/* style.css */
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #1c1c1c;
-    color: #fff;
-}
-
-header {
-    background: #a20000; /* rojo intenso EMS */
-    padding: 1rem;
-    text-align: center;
-}
-
-header h1 {
-    margin: 0;
-    font-size: 2rem;
-}
-
-main {
-    padding: 1rem;
-    max-width: 800px;
+/* Login centrado */
+#loginDiv {
+    max-width: 350px;
     margin: 2rem auto;
+    padding: 2rem;
     background: #2c2c2c;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    text-align: center;
 }
 
-input {
-    padding: 0.7rem;
-    margin-bottom: 0.5rem;
-    width: 100%;
-    border-radius: 5px;
-    border: none;
-    font-size: 1rem;
+#loginDiv input {
+    margin-bottom: 1rem;
 }
 
-button {
-    padding: 0.7rem;
-    width: 100%;
-    margin-bottom: 0.5rem;
-    border: none;
-    border-radius: 5px;
-    background: #e60000;
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.3s;
+#loginDiv button {
+    margin-top: 0.5rem;
 }
 
-button:hover {
-    background: #ff1a1a;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-th, td {
-    padding: 0.8rem;
-    text-align: left;
-}
-
-th {
-    background: #e60000;
-    color: white;
-    border-radius: 5px;
-}
-
-tr:nth-child(even) {
-    background: #3a3a3a;
-}
-
+/* Ajustar imagen logo */
 #loginDiv img {
     display: block;
-    margin: 0 auto 1rem auto;
-    max-width: 150px;
-}
-
-@media(max-width:600px) {
-    th, td {
-        font-size: 0.9rem;
-    }
-    button, input {
-        font-size: 1rem;
-    }
+    margin: 0 auto 1.5rem auto;
+    max-width: 120px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
