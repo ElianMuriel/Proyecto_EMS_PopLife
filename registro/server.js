@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(express.static("public"));
 
 // --- CONEXIÓN A MONGODB ---
-const mongoURI = process.env.MONGO_URI;
+const mongoURI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ems";
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("Conectado a MongoDB"))
     .catch(err => console.error("Error conectando a MongoDB:", err));
@@ -31,7 +31,6 @@ const RegistroSchema = new mongoose.Schema({
     salida: { type: Date }
 });
 
-// Modelo para guardar resúmenes semanales/mensuales
 const ResumenSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     periodo: { type: String, enum: ["semana", "mes"], required: true },
@@ -118,7 +117,7 @@ app.get("/registros", async (req, res) => {
     }
 });
 
-// Contador semanal (solo de la semana actual)
+// Contador semanal individual
 app.get("/contador-semanal/:userId", async (req, res) => {
     const { userId } = req.params;
     if (!userId) return res.status(400).send({ error: "userId requerido" });
@@ -141,7 +140,7 @@ app.get("/contador-semanal/:userId", async (req, res) => {
     }
 });
 
-// Contador mensual
+// Contador mensual individual
 app.get("/contador-mensual/:userId", async (req, res) => {
     const { userId } = req.params;
     if (!userId) return res.status(400).send({ error: "userId requerido" });
@@ -162,8 +161,65 @@ app.get("/contador-mensual/:userId", async (req, res) => {
     }
 });
 
+// --- RESUMEN GENERAL ---
+// Resumen semanal de todos los usuarios
+app.get("/resumen-semanal", async (req, res) => {
+    try {
+        const ahora = new Date();
+        const dia = ahora.getDay();
+        const diff = dia === 0 ? 6 : dia - 1;
+        const primerDiaSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diff, 0, 0, 0);
+
+        const registros = await Registro.find({
+            entrada: { $gte: primerDiaSemana },
+            salida: { $ne: null }
+        }).populate("userId", "nombre");
+
+        const resumen = {};
+        registros.forEach(r => {
+            const horas = (r.salida - r.entrada) / 1000 / 60 / 60;
+            if (!resumen[r.userId.nombre]) resumen[r.userId.nombre] = 0;
+            resumen[r.userId.nombre] += horas;
+        });
+
+        res.send(Object.entries(resumen).map(([nombre, horas]) => ({
+            nombre,
+            horas: horas.toFixed(2)
+        })));
+    } catch (err) {
+        res.status(500).send({ error: err.message });
+    }
+});
+
+// Resumen mensual de todos los usuarios
+app.get("/resumen-mensual", async (req, res) => {
+    try {
+        const ahora = new Date();
+        const primerDiaMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+
+        const registros = await Registro.find({
+            entrada: { $gte: primerDiaMes },
+            salida: { $ne: null }
+        }).populate("userId", "nombre");
+
+        const resumen = {};
+        registros.forEach(r => {
+            const horas = (r.salida - r.entrada) / 1000 / 60 / 60;
+            if (!resumen[r.userId.nombre]) resumen[r.userId.nombre] = 0;
+            resumen[r.userId.nombre] += horas;
+        });
+
+        res.send(Object.entries(resumen).map(([nombre, horas]) => ({
+            nombre,
+            horas: horas.toFixed(2)
+        })));
+    } catch (err) {
+        res.status(500).send({ error: err.message });
+    }
+});
+
 // --- FUNCIONES DE REINICIO ---
-// Reinicio mensual (elimina registros antiguos para ahorrar espacio)
+// Reinicio mensual (elimina registros antiguos)
 async function reinicioMensual() {
     try {
         const ahora = new Date();
@@ -179,12 +235,12 @@ async function reinicioMensual() {
 async function reinicioSemanal() {
     try {
         const ahora = new Date();
-        const dia = ahora.getDay(); // 0 = domingo
-        const diff = dia === 0 ? 6 : dia - 1; // retroceder hasta lunes
+        const dia = ahora.getDay();
+        const diff = dia === 0 ? 6 : dia - 1;
         const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diff, 0, 0, 0);
 
         // Obtener registros de la semana pasada
-        const registros = await Registro.find({ 
+        const registros = await Registro.find({
             entrada: { $lt: inicioSemana },
             salida: { $ne: null }
         }).populate("userId");
@@ -213,20 +269,15 @@ async function reinicioSemanal() {
     }
 }
 
-// Ejecutar reinicio mensual y semanal al iniciar el servidor
+// Ejecutar reinicio al iniciar servidor
 reinicioMensual();
 reinicioSemanal();
 
 // --- CRON ---
 // Cada lunes a medianoche
-cron.schedule("0 0 * * 1", () => {
-    reinicioSemanal();
-});
-
+cron.schedule("0 0 * * 1", () => { reinicioSemanal(); });
 // Cada 1 del mes a medianoche
-cron.schedule("0 0 1 * *", () => {
-    reinicioMensual();
-});
+cron.schedule("0 0 1 * *", () => { reinicioMensual(); });
 
 // --- INICIO DEL SERVIDOR ---
 app.get("/", (req, res) => {

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,59 +11,46 @@
       padding: 0;
       background: #f5f5f5;
     }
-
     header {
       background: #333;
       color: white;
       padding: 1rem;
       text-align: center;
     }
-
     main {
       padding: 1rem;
       max-width: 800px;
       margin: auto;
     }
-
-    input,
-    button {
+    input, button {
       padding: 0.5rem;
       margin: 0.3rem 0;
       width: 100%;
       box-sizing: border-box;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
     }
-
-    th,
-    td {
+    th, td {
       padding: 0.5rem;
       border: 1px solid #ccc;
       text-align: left;
     }
-
     #resumenDiv {
       display: none;
     }
-
     @media(max-width:600px) {
-      th,
-      td {
+      th, td {
         font-size: 0.9rem;
       }
-
-      button,
-      input {
+      button, input {
         font-size: 1rem;
       }
     }
   </style>
 </head>
-
 <body>
   <header>
     <h1>Registro EMS</h1>
@@ -187,22 +173,25 @@
         const tbody = document.getElementById("registrosBody");
         tbody.innerHTML = "";
         const hoy = new Date().toDateString();
-        registros.filter(r => new Date(r.entrada).toDateString() === hoy).forEach(r => {
+        registros.filter(r => new Date(r.entrada).toDateString() === hoy)
+                 .forEach(r => {
           const tr = document.createElement("tr");
           tr.innerHTML = `<td>${r.nombre}</td>
-                    <td>${new Date(r.entrada).toLocaleTimeString()}</td>
-                    <td>${r.salida ? new Date(r.salida).toLocaleTimeString() : "-"}</td>
-                    <td>${calcularHoras(r.entrada, r.salida)}</td>`;
+                          <td>${new Date(r.entrada).toLocaleTimeString()}</td>
+                          <td>${r.salida ? new Date(r.salida).toLocaleTimeString() : "-"}</td>
+                          <td>${calcularHoras(r.entrada, r.salida)}</td>`;
           tbody.appendChild(tr);
         });
       }
 
       async function actualizarContadores() {
         if (!user) return;
+        // Contador semanal
         const resSemana = await fetch(`/contador-semanal/${user._id}`);
         const dataSemana = await resSemana.json();
         document.getElementById("horasSemana").textContent = dataSemana.horas;
 
+        // Contador mensual
         const resMes = await fetch(`/contador-mensual/${user._id}`);
         const dataMes = await resMes.json();
         document.getElementById("horasMes").textContent = dataMes.horas;
@@ -213,11 +202,12 @@
         document.getElementById("controlDiv").style.display = "none";
         document.getElementById("resumenDiv").style.display = "block";
 
-        // Traer resúmenes desde backend
-        const resSemana = await fetch("/resumen-semanal");
-        const resumenSemana = await resSemana.json();
+        const [resSemana, resMes] = await Promise.all([
+          fetch("/resumen-semanal"),
+          fetch("/resumen-mensual")
+        ]);
 
-        const resMes = await fetch("/resumen-mensual");
+        const resumenSemana = await resSemana.json();
         const resumenMes = await resMes.json();
 
         const tbodySemana = document.getElementById("tbodySemana");
@@ -226,10 +216,15 @@
         tbodyMes.innerHTML = "";
 
         resumenSemana.forEach(r => {
-          tbodySemana.innerHTML += `<tr><td>${r.nombre}</td><td>${r.horas}</td></tr>`;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${r.nombre}</td><td>${r.horas}</td>`;
+          tbodySemana.appendChild(tr);
         });
+
         resumenMes.forEach(r => {
-          tbodyMes.innerHTML += `<tr><td>${r.nombre}</td><td>${r.horas}</td></tr>`;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${r.nombre}</td><td>${r.horas}</td>`;
+          tbodyMes.appendChild(tr);
         });
       }
 
@@ -247,5 +242,4 @@
     </script>
   </main>
 </body>
-
 </html>
